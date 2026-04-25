@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ferncrest — Financing Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F1EB;
+    --surface: #FDFBF8;
+    --surface2: #EDE9E2;
+    --border: rgba(60,50,30,0.12);
+    --border-strong: rgba(60,50,30,0.22);
+    --text: #2A2318;
+    --text-mid: #6B5F4E;
+    --text-muted: #9C8F7A;
+    --green: #2D6A4F;
+    --green-light: #D8EDD5;
+    --amber: #B45309;
+    --amber-light: #FEF3C7;
+    --red: #991B1B;
+    --red-light: #FEE2E2;
+    --accent: #5C3D1E;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px 60px; }
+  .wrap { max-width: 800px; margin: 0 auto; }
+
+  header { margin-bottom: 36px; }
+  .brand { font-family: 'DM Serif Display', serif; font-size: 11px; letter-spacing: 0.18em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; }
+  h1 { font-family: 'DM Serif Display', serif; font-size: 34px; font-weight: 400; line-height: 1.15; }
+  h1 em { font-style: italic; color: var(--text-mid); }
+  .subtitle { font-size: 14px; color: var(--text-muted); margin-top: 8px; line-height: 1.6; font-weight: 300; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; margin-bottom: 16px; }
+  .card-title { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 18px; font-family: 'DM Mono', monospace; }
+
+  .slider-grid { display: flex; flex-direction: column; gap: 14px; }
+  .slider-row { display: grid; grid-template-columns: 200px 1fr 100px; align-items: center; gap: 14px; }
+  .slider-row label { font-size: 13px; color: var(--text-mid); line-height: 1.4; }
+
+  input[type=range] { -webkit-appearance: none; width: 100%; height: 3px; border-radius: 2px; background: var(--surface2); outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.18); transition: transform 0.15s; }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  .slider-val { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text); text-align: right; }
+
+  .term-btns { display: flex; gap: 8px; }
+  .term-btn { flex: 1; padding: 7px 4px; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-mid); cursor: pointer; text-align: center; transition: all .15s; }
+  .term-btn:hover { background: var(--border); }
+  .term-btn.active { background: var(--accent); color: #F5F1EB; border-color: var(--accent); }
+  .term-note { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-style: italic; }
+
+  .metrics-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+  .metric { background: var(--surface2); border-radius: 10px; padding: 14px 16px; }
+  .metric-io { border: 1.5px solid rgba(180,83,9,0.35); }
+  .metric-io .metric-label { color: var(--amber); }
+  .metric-io .metric-value { color: var(--amber); }
+  .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; line-height: 1.4; }
+  .metric-value { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); line-height: 1.1; }
+  .metric-sub { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; font-family: 'DM Mono', monospace; line-height: 1.4; }
+
+  .stack-bar { display: flex; height: 28px; border-radius: 6px; overflow: hidden; margin-bottom: 10px; border: 1px solid var(--border); }
+  .stack-bar div { transition: width 0.35s ease; }
+  .legend { display: flex; gap: 20px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-mid); }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  .alert { font-size: 12px; border-radius: 8px; padding: 10px 14px; margin-top: 12px; line-height: 1.5; }
+  .alert-warn   { background: var(--amber-light); color: var(--amber); border: 1px solid rgba(180,83,9,0.2); }
+  .alert-danger { background: var(--red-light);   color: var(--red);   border: 1px solid rgba(153,27,27,0.2); }
+  .alert-ok     { background: var(--green-light); color: var(--green); border: 1px solid rgba(45,106,79,0.2); }
+
+  .opex-explainer { background: var(--surface2); border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; font-size: 12.5px; color: var(--text-mid); line-height: 1.7; }
+  .opex-explainer strong { color: var(--text); font-weight: 500; }
+
+  .dscr-big { font-family: 'DM Serif Display', serif; font-size: 40px; line-height: 1; margin-bottom: 4px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 6px 0 18px; }
+
+  .ramp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+  .ramp-cell { background: var(--surface2); border-radius: 8px; padding: 14px; text-align: center; }
+  .rc-label { font-size: 10px; color: var(--text-muted); font-family: 'DM Mono', monospace; letter-spacing: .05em; margin-bottom: 6px; line-height: 1.5; }
+  .rc-val { font-family: 'DM Serif Display', serif; font-size: 20px; }
+  .rc-sub { font-size: 10px; color: var(--text-muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+  .sens-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+  .sens-table th { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .05em; color: var(--text-muted); text-transform: uppercase; text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--border); font-weight: 500; }
+  .sens-table th:first-child { text-align: left; }
+  .sens-table td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-mid); }
+  .sens-table td:first-child { text-align: left; color: var(--text); }
+  .sens-table tr.active-row td { background: rgba(92,61,30,0.06); color: var(--text); font-weight: 500; }
+  .sens-table tr:last-child td { border-bottom: none; }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 26px; }
+    .metrics-row { grid-template-columns: 1fr 1fr; }
+    .slider-row { grid-template-columns: 130px 1fr 80px; gap: 10px; }
+    .two-col, .ramp-grid { grid-template-columns: 1fr; }
+    .term-btn { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="brand">Ferncrest — Franchise Finance Tool</p>
+    <h1>Financing Dashboard</h1>
+    <p class="subtitle">Model your project capital stack, monthly debt service, and cash flow viability. Adjust the inputs below to reflect your situation.</p>
+  </header>
+
+  <!-- Loan Inputs -->
+  <div class="card">
+    <p class="card-title">Loan Inputs</p>
+    <div class="slider-grid">
+      <div class="slider-row">
+        <label>Total project cost</label>
+        <input type="range" min="500000" max="2000000" step="50000" value="1000000" id="totalCost" oninput="calc()">
+        <span class="slider-val" id="totalCostVal">$1,000,000</span>
+      </div>
+      <div class="slider-row">
+        <label>Equity injection<br><span style="font-size:11px;color:var(--text-muted);font-style:italic;">(ROBS, cash, land equity, etc.)</span></label>
+        <input type="range" min="0" max="600000" step="5000" value="200000" id="extraEquity" oninput="calc()">
+        <span class="slider-val" id="extraEquityVal">$200,000</span>
+      </div>
+      <div class="slider-row">
+        <label>Interest rate</label>
+        <input type="range" min="6" max="13" step="0.25" value="9" id="rate" oninput="calc()">
+        <span class="slider-val" id="rateVal">9.00%</span>
+      </div>
+      <div class="slider-row" style="align-items:flex-start;padding-top:2px;">
+        <label style="padding-top:6px;">Loan term</label>
+        <div style="grid-column:span 2;">
+          <div class="term-btns">
+            <button class="term-btn" data-term="10" onclick="setTerm(10)">10 yr</button>
+            <button class="term-btn" data-term="15" onclick="setTerm(15)">15 yr</button>
+            <button class="term-btn" data-term="20" onclick="setTerm(20)">20 yr</button>
+            <button class="term-btn active" data-term="25" onclick="setTerm(25)">25 yr</button>
+          </div>
+          <p class="term-note">25 years is the typical SBA real estate loan term</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metrics Row 1: Loan amount / Monthly P+I / IO payment -->
+  <div class="metrics-row">
+    <div class="metric">
+      <p class="metric-label">Loan amount</p>
+      <p class="metric-value" id="loanAmt">—</p>
+      <p class="metric-sub" id="ltvNote">—</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">Monthly payment (P+I)</p>
+      <p class="metric-value" id="monthlyPmt">—</p>
+      <p class="metric-sub" id="annualDebt">—</p>
+    </div>
+    <div class="metric metric-io">
+      <p class="metric-label">IO payment</p>
+      <p class="metric-value" id="ioPmt">—</p>
+      <p class="metric-sub">during construction &amp; initial opening period; variable per loan</p>
+    </div>
+  </div>
+
+  <!-- Metrics Row 2: Equity / SBA fee / Cash-on-cash -->
+  <div class="metrics-row" style="margin-bottom:16px;">
+    <div class="metric">
+      <p class="metric-label">Equity injected</p>
+      <p class="metric-value" id="equityPct">—</p>
+      <p class="metric-sub" id="equityDollar">—</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">SBA guarantee fee (est.)</p>
+      <p class="metric-value" id="sbaFee">—</p>
+      <p class="metric-sub">add to closing cost budget</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">Cash-on-cash return</p>
+      <p class="metric-value" id="cocReturn">—</p>
+      <p class="metric-sub">annual cash flow ÷ equity in</p>
+    </div>
+  </div>
+
+  <!-- Project Cost Breakdown -->
+  <div class="card">
+    <p class="card-title">Project Cost Breakdown</p>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">Adjust each category — total project cost above updates automatically.</p>
+    <div class="slider-grid">
+      <div class="slider-row">
+        <label>Equipment<br><span style="font-size:11px;font-style:italic;opacity:.7;">(domes, wellness, amenities)</span></label>
+        <input type="range" min="0" max="800000" step="10000" value="300000" id="bEquip" oninput="syncBreakdown()">
+        <span class="slider-val" id="bEquipVal">$300,000</span>
+      </div>
+      <div class="slider-row">
+        <label>Land acquisition</label>
+        <input type="range" min="0" max="800000" step="10000" value="250000" id="bLand" oninput="syncBreakdown()">
+        <span class="slider-val" id="bLandVal">$250,000</span>
+      </div>
+      <div class="slider-row">
+        <label>Infrastructure<br><span style="font-size:11px;font-style:italic;opacity:.7;">(septic, well, electric, hookups)</span></label>
+        <input type="range" min="0" max="300000" step="5000" value="50000" id="bInfra" oninput="syncBreakdown()">
+        <span class="slider-val" id="bInfraVal">$50,000</span>
+      </div>
+      <div class="slider-row">
+        <label>Site work<br><span style="font-size:11px;font-style:italic;opacity:.7;">(land prep, landscaping)</span></label>
+        <input type="range" min="0" max="400000" step="5000" value="100000" id="bSite" oninput="syncBreakdown()">
+        <span class="slider-val" id="bSiteVal">$100,000</span>
+      </div>
+      <div class="slider-row">
+        <label>Soft costs<br><span style="font-size:11px;font-style:italic;opacity:.7;">(FF&amp;E, signage)</span></label>
+        <input type="range" min="0" max="300000" step="5000" value="100000" id="bFFE" oninput="syncBreakdown()">
+        <span class="slider-val" id="bFFEVal">$100,000</span>
+      </div>
+      <div class="slider-row">
+        <label>Miscellaneous<br><span style="font-size:11px;font-style:italic;opacity:.7;">(permit fees, professional fees)</span></label>
+        <input type="range" min="0" max="200000" step="5000" value="25000" id="bMisc" oninput="syncBreakdown()">
+        <span class="slider-val" id="bMiscVal">$25,000</span>
+      </div>
+      <div class="slider-row">
+        <label>Contingency<br><span style="font-size:11px;font-style:italic;opacity:.7;">(5–10% of hard costs; lenders want to see this)</span></label>
+        <input type="range" min="0" max="200000" step="5000" value="50000" id="bContingency" oninput="syncBreakdown()">
+        <span class="slider-val" id="bContingencyVal">$50,000</span>
+      </div>
+      <div class="slider-row">
+        <label>Working capital<br><span style="font-size:11px;font-style:italic;opacity:.7;">(operating runway before profitability)</span></label>
+        <input type="range" min="0" max="200000" step="5000" value="25000" id="bWC" oninput="syncBreakdown()">
+        <span class="slider-val" id="bWCVal">$25,000</span>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <div style="display:flex;height:32px;border-radius:6px;overflow:hidden;border:1px solid var(--border);margin-bottom:10px;" id="breakdownBar"></div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;" id="breakdownLegend"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+      <span style="font-size:12px;color:var(--text-muted);font-family:'DM Mono',monospace;">Total</span>
+      <span style="font-family:'DM Serif Display',serif;font-size:22px;" id="breakdownTotal">—</span>
+    </div>
+  </div>
+
+  <!-- Capital Stack -->
+  <div class="card">
+    <p class="card-title">Capital Stack</p>
+    <div style="margin:4px 0 12px;">
+      <div class="stack-bar" id="stackBar"></div>
+      <div class="legend" id="stackLegend"></div>
+    </div>
+    <div id="equityAlert"></div>
+  </div>
+
+  <!-- Cash Flow -->
+  <div class="card">
+    <p class="card-title">Cash Flow Viability</p>
+
+    <div class="opex-explainer">
+      <strong>What is OpEx?</strong> Operating expenses (OpEx) are everything it costs to run the property. This model uses <strong>50% of gross revenue</strong> as a blended OpEx rate — inclusive of franchise royalties (~7%), brand and marketing fees (~9%), payroll, utilities, laundry, insurance, repairs &amp; maintenance, merchant processing, and miscellaneous costs. The remaining 50% is your <strong>Net Operating Income (NOI)</strong> — the money available to cover your loan payment.
+    </div>
+
+    <div class="slider-grid" style="margin-bottom:20px;">
+      <div class="slider-row">
+        <label>Avg nightly rate</label>
+        <input type="range" min="100" max="500" step="10" value="200" id="adr" oninput="calc()">
+        <span class="slider-val" id="adrVal">$200</span>
+      </div>
+      <div class="slider-row">
+        <label>Units (domes)</label>
+        <input type="range" min="2" max="20" step="1" value="12" id="units" oninput="calc()">
+        <span class="slider-val" id="unitsVal">12</span>
+      </div>
+      <div class="slider-row">
+        <label>Occupancy</label>
+        <input type="range" min="20" max="85" step="5" value="50" id="occ" oninput="calc()">
+        <span class="slider-val" id="occVal">50%</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="two-col">
+      <div>
+        <p style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.05em;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px;">Annual Figures</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="metric">
+            <p class="metric-label">Gross revenue / yr</p>
+            <p class="metric-value" style="font-size:20px;" id="grossRev">—</p>
+          </div>
+          <div class="metric">
+            <p class="metric-label">NOI after 50% OpEx</p>
+            <p class="metric-value" style="font-size:20px;" id="netRev">—</p>
+          </div>
+          <div class="metric">
+            <p class="metric-label">Cash flow after debt</p>
+            <p class="metric-value" style="font-size:20px;" id="cashFlow">—</p>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px 16px;">
+        <p style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.08em;color:var(--text-muted);margin-bottom:6px;">DEBT SERVICE COVERAGE</p>
+        <p class="dscr-big" id="dscrBig">—</p>
+        <p style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-bottom:2px;">1.25x minimum for SBA</p>
+        <p style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-bottom:16px;">NOI ÷ annual debt service</p>
+        <div id="dscrBar" style="width:100%;"></div>
+        <div id="breakEvenBox" style="margin-top:14px;width:100%;"></div>
+      </div>
+    </div>
+
+    <div id="cashFlowAlert"></div>
+
+    <!-- Year-by-year ramp -->
+    <div style="margin-top:22px;padding-top:20px;border-top:1px solid var(--border);">
+      <p style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.05em;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Year-by-Year Ramp</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;line-height:1.65;">New glamping properties typically ramp as reviews and bookings build. Year 1 occupancy is often 30–40% before stabilizing at 55–70% by year 2–3. Figures use your current rate and unit count.</p>
+      <div class="ramp-grid" id="rampGrid"></div>
+    </div>
+  </div>
+
+  <!-- Rate Sensitivity -->
+  <div class="card">
+    <p class="card-title">Rate Sensitivity</p>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px;line-height:1.6;">SBA 7(a) loans carry a <strong style="color:var(--text);">variable rate</strong> tied to the WSJ Prime Rate. This table shows how your monthly payment and DSCR shift if rates move. Your current rate is highlighted.</p>
+    <table class="sens-table" id="sensTable"></table>
+  </div>
+
+  <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:4px;line-height:1.7;">
+    For illustrative planning purposes only. Consult a licensed SBA lender and tax advisor before making financial decisions.<br>
+    OpEx modeled at 50% of gross revenue, inclusive of franchise fees, royalties, and all operating costs.<br>
+    DSCR = NOI ÷ Annual Debt Service. SBA guarantee fee estimated on standard 7(a) schedule; confirm with your lender.
+  </p>
+
+</div>
+
+<script>
+let currentTerm = 25;
+
+function setTerm(t) {
+  currentTerm = t;
+  document.querySelectorAll('.term-btn').forEach(b => b.classList.toggle('active', +b.dataset.term === t));
+  calc();
+}
+
+function fmt(n)    { return '$' + Math.round(n).toLocaleString(); }
+function fmtPct(n) { return n.toFixed(1) + '%'; }
+
+function pmt(principal, annualRate, years) {
+  const r = annualRate / 100 / 12, n = years * 12;
+  if (r === 0) return principal / n;
+  return principal * r * Math.pow(1+r,n) / (Math.pow(1+r,n) - 1);
+}
+
+function sbaFeeCalc(loan) {
+  const g = loan * 0.75;
+  if (loan <= 150000)  return g * 0.02;
+  if (loan <= 700000)  return g * 0.03;
+  if (loan <= 1000000) return g * 0.035;
+  return g * 0.035;
+}
+
+function calc() {
+  const total  = +document.getElementById('totalCost').value;
+  const equity = +document.getElementById('extraEquity').value;
+  const rate   = +document.getElementById('rate').value;
+  const adr    = +document.getElementById('adr').value;
+  const units  = +document.getElementById('units').value;
+  const occ    = +document.getElementById('occ').value;
+  const term   = currentTerm;
+
+  document.getElementById('totalCostVal').textContent   = fmt(total);
+  document.getElementById('extraEquityVal').textContent = fmt(equity);
+  document.getElementById('rateVal').textContent        = rate.toFixed(2) + '%';
+
+  const loan      = Math.max(0, total - equity);
+  const equityPct = equity / total * 100;
+  const monthly   = loan > 0 ? pmt(loan, rate, term) : 0;
+  const annual    = monthly * 12;
+  const ioMonthly = loan * (rate / 100 / 12);
+  const fee       = sbaFeeCalc(loan);
+
+  document.getElementById('loanAmt').textContent      = fmt(loan);
+  document.getElementById('ltvNote').textContent      = 'LTV: ' + fmtPct(loan/total*100);
+  document.getElementById('monthlyPmt').textContent   = fmt(monthly) + '/mo';
+  document.getElementById('annualDebt').textContent   = fmt(annual) + '/yr';
+  document.getElementById('ioPmt').textContent        = fmt(ioMonthly) + '/mo';
+  document.getElementById('equityPct').textContent    = fmtPct(equityPct);
+  document.getElementById('equityDollar').textContent = fmt(equity) + ' total';
+  document.getElementById('sbaFee').textContent       = fmt(fee);
+
+  // Capital stack
+  document.getElementById('stackBar').innerHTML =
+    '<div style="width:'+equityPct.toFixed(2)+'%;background:#52B788;"></div>' +
+    '<div style="width:'+(loan/total*100).toFixed(2)+'%;background:#A8C5DA;"></div>';
+  document.getElementById('stackLegend').innerHTML =
+    '<span class="legend-item"><span class="swatch" style="background:#52B788;"></span>Equity ' + fmt(equity) + ' (' + fmtPct(equityPct) + ')</span>' +
+    '<span class="legend-item"><span class="swatch" style="background:#A8C5DA;"></span>SBA loan ' + fmt(loan) + ' (' + fmtPct(loan/total*100) + ')</span>';
+
+  const eqAlert = document.getElementById('equityAlert');
+  if (equityPct < 10) {
+    eqAlert.innerHTML = '<div class="alert alert-danger">Below the 10% minimum equity injection SBA requires. Add equity or reduce project scope.</div>';
+  } else if (equityPct < 20) {
+    eqAlert.innerHTML = '<div class="alert alert-warn">Equity is between 10–20%. Eligible for SBA 7(a), but 20%+ improves approval odds and may reduce your rate.</div>';
+  } else {
+    eqAlert.innerHTML = '<div class="alert alert-ok">Equity injection of ' + fmtPct(equityPct) + ' meets SBA requirements and positions well for SBA 504 real estate financing.</div>';
+  }
+
+  // Revenue & DSCR
+  const grossRev = units * adr * (occ/100) * 365;
+  const noi      = grossRev * 0.50;
+  const cashFlow = noi - annual;
+  const dscr     = annual > 0 ? noi / annual : 0;
+  const coc      = equity > 0 ? (cashFlow / equity * 100) : 0;
+
+  document.getElementById('adrVal').textContent   = fmt(adr);
+  document.getElementById('unitsVal').textContent = units;
+  document.getElementById('occVal').textContent   = occ + '%';
+  document.getElementById('grossRev').textContent = fmt(grossRev);
+  document.getElementById('netRev').textContent   = fmt(noi);
+
+  const cfEl = document.getElementById('cashFlow');
+  cfEl.textContent = fmt(cashFlow);
+  cfEl.style.color = cashFlow >= 0 ? 'var(--green)' : 'var(--red)';
+
+  const cocEl = document.getElementById('cocReturn');
+  cocEl.textContent = coc.toFixed(1) + '%';
+  cocEl.style.color = coc >= 8 ? 'var(--green)' : coc >= 0 ? 'var(--amber)' : 'var(--red)';
+
+  const dscrEl = document.getElementById('dscrBig');
+  dscrEl.textContent = dscr.toFixed(2) + 'x';
+  dscrEl.style.color = dscr >= 1.25 ? 'var(--green)' : dscr >= 1.0 ? 'var(--amber)' : 'var(--red)';
+
+  const barPct   = Math.min(dscr / 2.5 * 100, 100);
+  const barColor = dscr >= 1.25 ? '#2D6A4F' : dscr >= 1.0 ? '#B45309' : '#991B1B';
+  document.getElementById('dscrBar').innerHTML =
+    '<div style="background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;">' +
+    '<div style="width:'+barPct+'%;height:100%;background:'+barColor+';border-radius:4px;transition:width .3s;"></div>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);font-family:\'DM Mono\',monospace;margin-top:3px;"><span>0x</span><span style="color:var(--amber);">1.25x</span><span>2.5x</span></div>';
+
+  const beocc   = annual > 0 ? (annual / (units * adr * 365 * 0.50)) * 100 : 0;
+  const beColor = beocc <= 40 ? 'var(--green)' : beocc <= 60 ? 'var(--amber)' : 'var(--red)';
+  document.getElementById('breakEvenBox').innerHTML =
+    '<div style="background:var(--surface2);border-radius:8px;padding:12px;">' +
+    '<p style="font-size:10px;font-family:\'DM Mono\',monospace;color:var(--text-muted);letter-spacing:.05em;margin-bottom:4px;">BREAK-EVEN OCCUPANCY</p>' +
+    '<p style="font-family:\'DM Serif Display\',serif;font-size:30px;color:'+beColor+';">' + beocc.toFixed(1) + '%</p>' +
+    '<p style="font-size:10px;color:var(--text-muted);font-family:\'DM Mono\',monospace;margin-top:2px;">min. to cover debt service</p>' +
+    '</div>';
+
+  const cfAlert = document.getElementById('cashFlowAlert');
+  if (cashFlow < 0) {
+    cfAlert.innerHTML = '<div class="alert alert-danger" style="margin-top:16px;">Cash flow is negative at these assumptions. Increase rates, occupancy, or units — or reduce loan size.</div>';
+  } else if (dscr < 1.25) {
+    cfAlert.innerHTML = '<div class="alert alert-warn" style="margin-top:16px;">Revenue covers debt but DSCR is below 1.25x. SBA lenders require 1.25x minimum. Strengthen projections or reduce loan size.</div>';
+  } else {
+    cfAlert.innerHTML = '<div class="alert alert-ok" style="margin-top:16px;">DSCR of ' + dscr.toFixed(2) + 'x clears the SBA threshold. ' + fmt(cashFlow) + '/yr remaining after debt service.</div>';
+  }
+
+  // Ramp
+  const ramps = [
+    { label:'Year 1', occ:35, note:'typical ramp' },
+    { label:'Year 2', occ:50, note:'building reviews' },
+    { label:'Year 3+', occ:65, note:'stabilized' }
+  ];
+  document.getElementById('rampGrid').innerHTML = ramps.map(r => {
+    const rNOI  = units * adr * (r.occ/100) * 365 * 0.50;
+    const rCF   = rNOI - annual;
+    const rDSCR = annual > 0 ? rNOI / annual : 0;
+    const cfC   = rCF >= 0 ? 'var(--green)' : 'var(--red)';
+    const dcC   = rDSCR >= 1.25 ? 'var(--green)' : rDSCR >= 1.0 ? 'var(--amber)' : 'var(--red)';
+    return '<div class="ramp-cell">' +
+      '<p class="rc-label">' + r.label + ' · ' + r.occ + '% occ<br><span style="opacity:.7;">' + r.note + '</span></p>' +
+      '<p class="rc-val" style="color:'+cfC+';">' + fmt(rCF) + '</p>' +
+      '<p class="rc-sub">cash flow · DSCR <span style="color:'+dcC+';">' + rDSCR.toFixed(2) + 'x</span></p>' +
+      '</div>';
+  }).join('');
+
+  // Rate sensitivity
+  const testRates = [7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11];
+  let tbl = '<thead><tr><th>Rate</th><th>Monthly P+I</th><th>Annual debt</th><th>DSCR</th></tr></thead><tbody>';
+  testRates.forEach(r => {
+    const m  = loan > 0 ? pmt(loan, r, term) : 0;
+    const a  = m * 12;
+    const d  = a > 0 ? noi / a : 0;
+    const hi = Math.abs(r - rate) < 0.01;
+    const dc = d >= 1.25 ? 'var(--green)' : d >= 1.0 ? 'var(--amber)' : 'var(--red)';
+    tbl += '<tr' + (hi ? ' class="active-row"' : '') + '>' +
+      '<td>' + r.toFixed(2) + '%' + (hi ? ' ◀' : '') + '</td>' +
+      '<td>' + fmt(m) + '/mo</td>' +
+      '<td>' + fmt(a) + '/yr</td>' +
+      '<td style="color:'+dc+';">' + d.toFixed(2) + 'x</td>' +
+      '</tr>';
+  });
+  tbl += '</tbody>';
+  document.getElementById('sensTable').innerHTML = tbl;
+}
+
+// Breakdown config
+const BD_IDS = ['bEquip','bLand','bInfra','bSite','bFFE','bMisc','bContingency','bWC'];
+const BD_COLORS = {
+  bEquip:'#5C3D1E', bLand:'#A0785A', bInfra:'#7B5EA7', bSite:'#2D6A4F',
+  bFFE:'#378ADD', bMisc:'#9C8F7A', bContingency:'#C9A84C', bWC:'#BA7517'
+};
+const BD_LABELS = {
+  bEquip:'Equipment', bLand:'Land acquisition', bInfra:'Infrastructure',
+  bSite:'Site work', bFFE:'Soft costs',
+  bMisc:'Miscellaneous', bContingency:'Contingency', bWC:'Working capital'
+};
+
+function syncBreakdown() {
+  let total = 0;
+  BD_IDS.forEach(id => {
+    const v = +document.getElementById(id).value;
+    total += v;
+    document.getElementById(id+'Val').textContent = fmt(v);
+  });
+  document.getElementById('totalCost').value = Math.min(Math.max(total, 500000), 2000000);
+  renderBreakdown(total);
+  calc();
+}
+
+function renderBreakdown(total) {
+  if (!total) { total = 0; BD_IDS.forEach(id => { total += +document.getElementById(id).value; }); }
+  document.getElementById('breakdownTotal').textContent = fmt(total);
+  let barH = '', legH = '';
+  BD_IDS.forEach(id => {
+    const v = +document.getElementById(id).value;
+    const p = total > 0 ? (v/total*100) : 0;
+    if (v === 0) return;
+    barH += '<div style="width:'+p.toFixed(2)+'%;background:'+BD_COLORS[id]+';transition:width .35s;"></div>';
+    legH += '<span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-mid);">' +
+      '<span style="width:9px;height:9px;border-radius:2px;background:'+BD_COLORS[id]+';flex-shrink:0;"></span>' +
+      BD_LABELS[id] + ' ' + fmtPct(p) + '</span>';
+  });
+  document.getElementById('breakdownBar').innerHTML = barH;
+  document.getElementById('breakdownLegend').innerHTML = legH;
+}
+
+calc();
+renderBreakdown();
+</script>
+</body>
+</html>
