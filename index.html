@@ -188,55 +188,119 @@
   <!-- Project Cost Breakdown -->
   <div class="card">
     <p class="card-title">Project Cost Breakdown</p>
-    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">Adjust each category — total project cost above updates automatically.</p>
-    <div class="slider-grid">
-      <div class="slider-row">
-        <label>Equipment<br><span style="font-size:11px;font-style:italic;opacity:.7;">(domes, wellness, amenities)</span></label>
-        <input type="range" min="0" max="800000" step="10000" value="300000" id="bEquip" oninput="syncBreakdown()">
-        <span class="slider-val" id="bEquipVal">$300,000</span>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">Set your unit count first — per-unit costs scale automatically. Fixed costs remain constant regardless of unit count.</p>
+
+    <!-- Unit count stepper -->
+    <div style="display:flex;align-items:center;gap:16px;background:var(--surface2);border-radius:10px;padding:14px 18px;margin-bottom:20px;">
+      <div style="flex:1;">
+        <p style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.05em;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Number of Units</p>
+        <p style="font-size:11px;color:var(--text-muted);font-style:italic;">(domes, cabins, or structures)</p>
       </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button onclick="changeUnits(-1)" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border-strong);background:var(--surface);font-size:18px;cursor:pointer;color:var(--text-mid);display:flex;align-items:center;justify-content:center;line-height:1;">−</button>
+        <span id="bdUnitsDisplay" style="font-family:'DM Serif Display',serif;font-size:32px;min-width:40px;text-align:center;">12</span>
+        <button onclick="changeUnits(1)" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border-strong);background:var(--surface);font-size:18px;cursor:pointer;color:var(--text-mid);display:flex;align-items:center;justify-content:center;line-height:1;">+</button>
+      </div>
+    </div>
+
+    <!-- Equipment Setup Costs -->
+    <div style="background:rgba(92,61,30,0.06);border:1px solid rgba(92,61,30,0.14);border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <div style="width:3px;height:16px;background:var(--accent);border-radius:2px;"></div>
+        <p style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.05em;color:var(--accent);text-transform:uppercase;font-weight:500;">Equipment Setup Costs</p>
+      </div>
+
+      <!-- Per Unit subsection -->
+      <p style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.04em;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(92,61,30,0.12);">Per Unit <span style="font-style:italic;text-transform:none;letter-spacing:0;opacity:.7;">— scales with unit count</span></p>
+      <div class="slider-grid" style="margin-bottom:18px;">
+        <div class="slider-row">
+          <label>Domes or Cabins / Unit<br><span style="font-size:11px;font-style:italic;opacity:.7;">(structure, delivery, install)</span></label>
+          <input type="range" min="5000" max="80000" step="1000" value="15000" id="bEquipPer" oninput="syncBreakdown()" style="background:#C8BFB0;">
+          <span class="slider-val" id="bEquipPerVal">$15,000</span>
+        </div>
+        <div class="slider-row">
+          <label>Wellness &amp; Amenities / Unit<br><span style="font-size:11px;font-style:italic;opacity:.7;">(sauna, hot tubs, per-unit features)</span></label>
+          <input type="range" min="0" max="10000" step="500" value="4500" id="bWellnessPer" oninput="syncBreakdown()" style="background:#C8BFB0;">
+          <span class="slider-val" id="bWellnessPerVal">$4,500</span>
+        </div>
+        <div class="slider-row">
+          <label>Site Work / Unit<br><span style="font-size:11px;font-style:italic;opacity:.7;">(site prep, platforms, electrical hookups)</span></label>
+          <input type="range" min="0" max="30000" step="500" value="6000" id="bSitePer" oninput="syncBreakdown()" style="background:#C8BFB0;">
+          <span class="slider-val" id="bSitePerVal">$6,000</span>
+        </div>
+        <div class="slider-row">
+          <label>Soft Costs / Unit<br><span style="font-size:11px;font-style:italic;opacity:.7;">(FF&amp;E, furnishings)</span></label>
+          <input type="range" min="0" max="20000" step="500" value="4500" id="bFFEPer" oninput="syncBreakdown()" style="background:#C8BFB0;">
+          <span class="slider-val" id="bFFEPerVal">$4,500</span>
+        </div>
+      </div>
+
+      <!-- Per Property subsection -->
+      <p style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.04em;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(92,61,30,0.12);">Per Property <span style="font-style:italic;text-transform:none;letter-spacing:0;opacity:.7;">— fixed regardless of unit count</span></p>
+      <div class="slider-grid">
+        <div class="slider-row">
+          <label>Bathhouse<br><span style="font-size:11px;font-style:italic;opacity:.7;">(shared, typically 1 per ~12 units)</span></label>
+          <input type="range" min="0" max="250000" step="5000" value="70000" id="bBathhouse" oninput="syncBreakdown()" style="background:#C8BFB0;">
+          <span class="slider-val" id="bBathhouseVal">$70,000</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fixed costs -->
+    <div style="background:var(--surface);border:1px solid rgba(60,50,30,0.18);border-radius:10px;padding:16px 18px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <div style="width:3px;height:16px;background:var(--text-muted);border-radius:2px;"></div>
+        <p style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.05em;color:var(--text-muted);text-transform:uppercase;font-weight:500;">Fixed Costs</p>
+        <p style="font-size:11px;color:var(--text-muted);font-style:italic;">— does not scale with units</p>
+      </div>
+    <div class="slider-grid">
       <div class="slider-row">
         <label>Land acquisition</label>
         <input type="range" min="0" max="800000" step="10000" value="250000" id="bLand" oninput="syncBreakdown()">
         <span class="slider-val" id="bLandVal">$250,000</span>
       </div>
       <div class="slider-row">
-        <label>Infrastructure<br><span style="font-size:11px;font-style:italic;opacity:.7;">(septic, well, electric, hookups)</span></label>
-        <input type="range" min="0" max="300000" step="5000" value="50000" id="bInfra" oninput="syncBreakdown()">
-        <span class="slider-val" id="bInfraVal">$50,000</span>
+        <label>Infrastructure<br><span style="font-size:11px;font-style:italic;opacity:.7;">(septic, well, power, etc.)</span></label>
+        <input type="range" min="0" max="200000" step="5000" value="40000" id="bInfraFixed" oninput="syncBreakdown()">
+        <span class="slider-val" id="bInfraFixedVal">$40,000</span>
       </div>
       <div class="slider-row">
-        <label>Site work<br><span style="font-size:11px;font-style:italic;opacity:.7;">(land prep, landscaping)</span></label>
-        <input type="range" min="0" max="400000" step="5000" value="100000" id="bSite" oninput="syncBreakdown()">
-        <span class="slider-val" id="bSiteVal">$100,000</span>
+        <label>Site Work<br><span style="font-size:11px;font-style:italic;opacity:.7;">(road access, clearing, landscaping)</span></label>
+        <input type="range" min="0" max="200000" step="5000" value="40000" id="bSiteFixed" oninput="syncBreakdown()">
+        <span class="slider-val" id="bSiteFixedVal">$40,000</span>
       </div>
       <div class="slider-row">
-        <label>Soft costs<br><span style="font-size:11px;font-style:italic;opacity:.7;">(FF&amp;E, signage)</span></label>
-        <input type="range" min="0" max="300000" step="5000" value="100000" id="bFFE" oninput="syncBreakdown()">
-        <span class="slider-val" id="bFFEVal">$100,000</span>
+        <label>Soft Costs<br><span style="font-size:11px;font-style:italic;opacity:.7;">(signage, common areas, etc.)</span></label>
+        <input type="range" min="0" max="100000" step="2500" value="40000" id="bFFEFixed" oninput="syncBreakdown()">
+        <span class="slider-val" id="bFFEFixedVal">$40,000</span>
       </div>
       <div class="slider-row">
-        <label>Miscellaneous<br><span style="font-size:11px;font-style:italic;opacity:.7;">(permit fees, professional fees)</span></label>
+        <label>Miscellaneous<br><span style="font-size:11px;font-style:italic;opacity:.7;">(permit fees, professional fees, etc.)</span></label>
         <input type="range" min="0" max="200000" step="5000" value="25000" id="bMisc" oninput="syncBreakdown()">
         <span class="slider-val" id="bMiscVal">$25,000</span>
       </div>
       <div class="slider-row">
-        <label>Contingency<br><span style="font-size:11px;font-style:italic;opacity:.7;">(5–10% of hard costs; lenders want to see this)</span></label>
+        <label>Contingency<br><span style="font-size:11px;font-style:italic;opacity:.7;">(5–10% of budget)</span></label>
         <input type="range" min="0" max="200000" step="5000" value="50000" id="bContingency" oninput="syncBreakdown()">
         <span class="slider-val" id="bContingencyVal">$50,000</span>
       </div>
       <div class="slider-row">
-        <label>Working capital<br><span style="font-size:11px;font-style:italic;opacity:.7;">(operating runway before profitability)</span></label>
+        <label>Working Capital<br><span style="font-size:11px;font-style:italic;opacity:.7;">(operating runway before profitability)</span></label>
         <input type="range" min="0" max="200000" step="5000" value="25000" id="bWC" oninput="syncBreakdown()">
         <span class="slider-val" id="bWCVal">$25,000</span>
       </div>
     </div>
-    <div style="margin-top:20px;">
+    </div>
+
+    <!-- Breakdown totals by category -->
+    <div style="margin-top:20px;padding:14px 16px;background:var(--surface2);border-radius:10px;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;" id="bdCategoryTotals"></div>
+
+    <div style="margin-top:16px;">
       <div style="display:flex;height:32px;border-radius:6px;overflow:hidden;border:1px solid var(--border);margin-bottom:10px;" id="breakdownBar"></div>
       <div style="display:flex;gap:14px;flex-wrap:wrap;" id="breakdownLegend"></div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-      <span style="font-size:12px;color:var(--text-muted);font-family:'DM Mono',monospace;">Total</span>
+      <span style="font-size:12px;color:var(--text-muted);font-family:'DM Mono',monospace;">Total project cost</span>
       <span style="font-family:'DM Serif Display',serif;font-size:22px;" id="breakdownTotal">—</span>
     </div>
   </div>
@@ -256,7 +320,7 @@
     <p class="card-title">Cash Flow Viability</p>
 
     <div class="opex-explainer">
-      <strong>What is OpEx?</strong> Operating expenses (OpEx) are everything it costs to run the property. This model uses <strong>50% of gross revenue</strong> as a blended OpEx rate — inclusive of franchise royalties (~7%), brand and marketing fees (~9%), payroll, utilities, laundry, insurance, repairs &amp; maintenance, merchant processing, and miscellaneous costs. The remaining 50% is your <strong>Net Operating Income (NOI)</strong> — the money available to cover your loan payment.
+      <strong>What is OpEx?</strong> Operating expenses (OpEx) are everything it costs to run the property. This model uses <strong>55% of gross revenue</strong> as a blended OpEx rate — inclusive of franchise royalties (~7%), brand and marketing fees (~9%), payroll, utilities, laundry, insurance, repairs &amp; maintenance, merchant processing, and miscellaneous costs. The remaining 45% is your <strong>Net Operating Income (NOI)</strong> — the money available to cover your loan payment.
     </div>
 
     <div class="slider-grid" style="margin-bottom:20px;">
@@ -272,8 +336,8 @@
       </div>
       <div class="slider-row">
         <label>Occupancy</label>
-        <input type="range" min="20" max="85" step="5" value="50" id="occ" oninput="calc()">
-        <span class="slider-val" id="occVal">50%</span>
+        <input type="range" min="20" max="85" step="5" value="45" id="occ" oninput="calc()">
+        <span class="slider-val" id="occVal">45%</span>
       </div>
     </div>
 
@@ -288,7 +352,7 @@
             <p class="metric-value" style="font-size:20px;" id="grossRev">—</p>
           </div>
           <div class="metric">
-            <p class="metric-label">NOI after 50% OpEx</p>
+            <p class="metric-label">NOI after 55% OpEx</p>
             <p class="metric-value" style="font-size:20px;" id="netRev">—</p>
           </div>
           <div class="metric">
@@ -326,7 +390,7 @@
 
   <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:4px;line-height:1.7;">
     For illustrative planning purposes only. Consult a licensed SBA lender and tax advisor before making financial decisions.<br>
-    OpEx modeled at 50% of gross revenue, inclusive of franchise fees, royalties, and all operating costs.<br>
+    OpEx modeled at 55% of gross revenue, inclusive of franchise fees, royalties, and all operating costs.<br>
     DSCR = NOI ÷ Annual Debt Service. SBA guarantee fee estimated on standard 7(a) schedule; confirm with your lender.
   </p>
 
@@ -406,7 +470,7 @@ function calc() {
 
   // Revenue & DSCR
   const grossRev = units * adr * (occ/100) * 365;
-  const noi      = grossRev * 0.50;
+  const noi      = grossRev * 0.45;
   const cashFlow = noi - annual;
   const dscr     = annual > 0 ? noi / annual : 0;
   const coc      = equity > 0 ? (cashFlow / equity * 100) : 0;
@@ -437,7 +501,7 @@ function calc() {
     '</div>' +
     '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);font-family:\'DM Mono\',monospace;margin-top:3px;"><span>0x</span><span style="color:var(--amber);">1.25x</span><span>2.5x</span></div>';
 
-  const beocc   = annual > 0 ? (annual / (units * adr * 365 * 0.50)) * 100 : 0;
+  const beocc   = annual > 0 ? (annual / (units * adr * 365 * 0.45)) * 100 : 0;
   const beColor = beocc <= 40 ? 'var(--green)' : beocc <= 60 ? 'var(--amber)' : 'var(--red)';
   document.getElementById('breakEvenBox').innerHTML =
     '<div style="background:var(--surface2);border-radius:8px;padding:12px;">' +
@@ -462,7 +526,7 @@ function calc() {
     { label:'Year 3+', occ:65, note:'stabilized' }
   ];
   document.getElementById('rampGrid').innerHTML = ramps.map(r => {
-    const rNOI  = units * adr * (r.occ/100) * 365 * 0.50;
+    const rNOI  = units * adr * (r.occ/100) * 365 * 0.45;
     const rCF   = rNOI - annual;
     const rDSCR = annual > 0 ? rNOI / annual : 0;
     const cfC   = rCF >= 0 ? 'var(--green)' : 'var(--red)';
@@ -494,49 +558,106 @@ function calc() {
   document.getElementById('sensTable').innerHTML = tbl;
 }
 
-// Breakdown config
-const BD_IDS = ['bEquip','bLand','bInfra','bSite','bFFE','bMisc','bContingency','bWC'];
+// Breakdown
+let bdUnits = 12;
+
+function changeUnits(delta) {
+  bdUnits = Math.max(1, Math.min(30, bdUnits + delta));
+  document.getElementById('bdUnitsDisplay').textContent = bdUnits;
+  // Keep cash flow units slider in sync
+  document.getElementById('units').value = bdUnits;
+  syncBreakdown();
+}
+
 const BD_COLORS = {
   bEquip:'#5C3D1E', bLand:'#A0785A', bInfra:'#7B5EA7', bSite:'#2D6A4F',
   bFFE:'#378ADD', bMisc:'#9C8F7A', bContingency:'#C9A84C', bWC:'#BA7517'
 };
-const BD_LABELS = {
-  bEquip:'Equipment', bLand:'Land acquisition', bInfra:'Infrastructure',
-  bSite:'Site work', bFFE:'Soft costs',
-  bMisc:'Miscellaneous', bContingency:'Contingency', bWC:'Working capital'
-};
 
 function syncBreakdown() {
-  let total = 0;
-  BD_IDS.forEach(id => {
-    const v = +document.getElementById(id).value;
-    total += v;
-    document.getElementById(id+'Val').textContent = fmt(v);
-  });
-  document.getElementById('totalCost').value = Math.min(Math.max(total, 500000), 2000000);
-  renderBreakdown(total);
-  calc();
-}
+  const equipPer   = +document.getElementById('bEquipPer').value;
+  const wellnessPer= +document.getElementById('bWellnessPer').value;
+  const sitePer    = +document.getElementById('bSitePer').value;
+  const ffePer     = +document.getElementById('bFFEPer').value;
+  const infraFixed = +document.getElementById('bInfraFixed').value;
+  const bathhouse  = +document.getElementById('bBathhouse').value;
+  const siteFixed  = +document.getElementById('bSiteFixed').value;
+  const ffeFixed   = +document.getElementById('bFFEFixed').value;
+  const land       = +document.getElementById('bLand').value;
+  const misc       = +document.getElementById('bMisc').value;
+  const contingency= +document.getElementById('bContingency').value;
+  const wc         = +document.getElementById('bWC').value;
 
-function renderBreakdown(total) {
-  if (!total) { total = 0; BD_IDS.forEach(id => { total += +document.getElementById(id).value; }); }
-  document.getElementById('breakdownTotal').textContent = fmt(total);
+  document.getElementById('bEquipPerVal').textContent    = fmt(equipPer);
+  document.getElementById('bWellnessPerVal').textContent = fmt(wellnessPer);
+  document.getElementById('bSitePerVal').textContent     = fmt(sitePer);
+  document.getElementById('bFFEPerVal').textContent      = fmt(ffePer);
+  document.getElementById('bInfraFixedVal').textContent  = fmt(infraFixed);
+  document.getElementById('bBathhouseVal').textContent   = fmt(bathhouse);
+  document.getElementById('bSiteFixedVal').textContent   = fmt(siteFixed);
+  document.getElementById('bFFEFixedVal').textContent    = fmt(ffeFixed);
+  document.getElementById('bLandVal').textContent        = fmt(land);
+  document.getElementById('bMiscVal').textContent        = fmt(misc);
+  document.getElementById('bContingencyVal').textContent = fmt(contingency);
+  document.getElementById('bWCVal').textContent          = fmt(wc);
+
+  const totalEquip   = (equipPer + wellnessPer) * bdUnits;
+  const totalInfra   = infraFixed + bathhouse;
+  const totalSite    = siteFixed + (sitePer * bdUnits);
+  const totalFFE     = ffeFixed  + (ffePer  * bdUnits);
+  const totalFixed   = land + misc + contingency + wc;
+  const grandTotal = totalEquip + totalInfra + totalSite + totalFFE + totalFixed;
+
+  // Update total cost slider
+  document.getElementById('totalCost').value = Math.min(Math.max(grandTotal, 500000), 2000000);
+  document.getElementById('breakdownTotal').textContent = fmt(grandTotal);
+
+  // Category summary boxes
+  const totalEquipAll = (equipPer + wellnessPer) * bdUnits + bathhouse;
+  document.getElementById('bdCategoryTotals').innerHTML =
+    catBox('Equipment', totalEquipAll, grandTotal, BD_COLORS.bEquip) +
+    catBox('Site work', totalSite, grandTotal, BD_COLORS.bSite) +
+    catBox('Soft costs', totalFFE, grandTotal, BD_COLORS.bFFE) +
+    catBox('Land', land, grandTotal, BD_COLORS.bLand) +
+    catBox('Infrastructure', infraFixed, grandTotal, BD_COLORS.bInfra) +
+    catBox('Reserves', misc + contingency + wc, grandTotal, BD_COLORS.bMisc);
+
+  // Stacked bar — by category
+  const cats = [
+    { v: (equipPer + wellnessPer) * bdUnits + bathhouse, c: BD_COLORS.bEquip, l: 'Equipment' },
+    { v: totalSite,   c: BD_COLORS.bSite,  l: 'Site work' },
+    { v: totalFFE,    c: BD_COLORS.bFFE,   l: 'Soft costs' },
+    { v: land,        c: BD_COLORS.bLand,  l: 'Land' },
+    { v: infraFixed,  c: BD_COLORS.bInfra, l: 'Infrastructure' },
+    { v: misc + contingency + wc, c: BD_COLORS.bMisc, l: 'Reserves' },
+  ];
   let barH = '', legH = '';
-  BD_IDS.forEach(id => {
-    const v = +document.getElementById(id).value;
-    const p = total > 0 ? (v/total*100) : 0;
-    if (v === 0) return;
-    barH += '<div style="width:'+p.toFixed(2)+'%;background:'+BD_COLORS[id]+';transition:width .35s;"></div>';
+  cats.forEach(cat => {
+    if (cat.v === 0) return;
+    const p = grandTotal > 0 ? (cat.v / grandTotal * 100) : 0;
+    barH += '<div style="width:'+p.toFixed(2)+'%;background:'+cat.c+';transition:width .35s;"></div>';
     legH += '<span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-mid);">' +
-      '<span style="width:9px;height:9px;border-radius:2px;background:'+BD_COLORS[id]+';flex-shrink:0;"></span>' +
-      BD_LABELS[id] + ' ' + fmtPct(p) + '</span>';
+      '<span style="width:9px;height:9px;border-radius:2px;background:'+cat.c+';flex-shrink:0;"></span>' +
+      cat.l + ' ' + fmtPct(p) + '</span>';
   });
   document.getElementById('breakdownBar').innerHTML = barH;
   document.getElementById('breakdownLegend').innerHTML = legH;
+
+  calc();
+}
+
+function catBox(label, value, total, color) {
+  const pct = total > 0 ? (value/total*100).toFixed(1) : '0.0';
+  return '<div style="text-align:center;">' +
+    '<div style="width:6px;height:6px;border-radius:50%;background:'+color+';margin:0 auto 4px;"></div>' +
+    '<p style="font-size:10px;color:var(--text-muted);font-family:\'DM Mono\',monospace;margin-bottom:2px;">'+label+'</p>' +
+    '<p style="font-family:\'DM Serif Display\',serif;font-size:15px;">'+fmt(value)+'</p>' +
+    '<p style="font-size:10px;color:var(--text-muted);font-family:\'DM Mono\',monospace;">'+pct+'%</p>' +
+    '</div>';
 }
 
 calc();
-renderBreakdown();
+syncBreakdown();
 </script>
 </body>
 </html>
